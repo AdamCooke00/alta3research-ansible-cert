@@ -1,0 +1,42 @@
+---
+- name: API Fun for Ansible Cert & all hosts gets the cert too
+  hosts: planetexpress
+  connection: ssh
+  gather_facts: false
+
+  vars_files:
+    - vars/libraries.yml
+
+  tasks:
+    - name: Create directory for library
+      become: true
+      file:
+        path: "/home/{{ fileuser }}/generated/{{ item.lib }}"
+        state: directory
+      loop: "{{ units }}"
+
+    - name: API Hit and File
+      become: true
+      get_url:
+        url: "{{ item.end }}"
+        dest: "/home/{{ fileuser }}/generated/{{item.lib}}/output.json"
+      loop: "{{ units }}"
+
+
+    - name: API Hit and Use Vars
+      become: true
+      uri:
+        url: https://fakerapi.it/api/v1/addresses?_quantity=1
+        method: GET
+      register: results
+
+    - name: copy results stored in var from previous task into file 
+      become: true
+      copy:
+        dest: "/home/{{ fileuser }}/generated/output_from_register.json"
+        content: "{{ results.json }}"
+
+    - name: Clone the cert ansible file from github public repo
+      git:
+        repo: https://github.com/AdamCooke00/alta3research-ansible-cert.git
+        dest: ~/certification-repos/

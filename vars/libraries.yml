@@ -1,0 +1,8 @@
+---
+units:
+  - lib: teams
+    end: https://api.squiggle.com.au/?q=teams
+  - lib: books
+    end: https://poetrydb.org/title/Ozymandias/lines.json
+  - lib: cities
+    end: http://api.geonames.org/weatherJSON?north=44.1&south=-9.9&east=-22.4&west=55.2&username=demo
