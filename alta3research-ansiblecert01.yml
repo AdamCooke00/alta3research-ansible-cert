@@ -6,15 +6,17 @@
 
   vars_files:
     - vars/libraries.yml
-
+  
   tasks:
+    #create folder structure, loop through list located in vars file to find the names of the folders to create
     - name: Create directory for library
       become: true
       file:
         path: "/home/{{ fileuser }}/generated/{{ item.lib }}"
         state: directory
       loop: "{{ units }}"
-
+    
+    #hit apis found in the vars file, place output in json files
     - name: API Hit and File
       become: true
       get_url:
@@ -22,7 +24,8 @@
         dest: "/home/{{ fileuser }}/generated/{{item.lib}}/output.json"
       loop: "{{ units }}"
 
-
+  
+    #use register module to save the output from a hardcoded endpoints to a playbook variable during execution
     - name: API Hit and Use Vars
       become: true
       uri:
@@ -30,12 +33,16 @@
         method: GET
       register: results
 
+    #use said variable here to create a file
     - name: copy results stored in var from previous task into file 
       become: true
       copy:
         dest: "/home/{{ fileuser }}/generated/output_from_register.json"
         content: "{{ results.json }}"
 
+
+    #clone the repo that this playbook is found in, would be interesting to then run this ansible playbook in the clients
+    #not doing it incase it spirals down to infinite client creations, but nonetheless infinite loop potential
     - name: Clone the cert ansible file from github public repo
       git:
         repo: https://github.com/AdamCooke00/alta3research-ansible-cert.git
